@@ -1,0 +1,97 @@
+﻿@model HiredWorkerManagement.ViewModels.Input.WorkerEditModel
+<h3>Edit worker</h3>
+<input type="hidden" name="sever-action" id="server-action" value="@ViewData["Act"]" />
+@Html.HiddenFor(x=> x.WorkerId)
+<div class="form-group row mb-1">
+    @Html.LabelFor(x => x.WorkerName, new { @class = "col-form-label col-form-label-sm col-2 text-end" })
+    <div class="col-4">
+        @Html.TextBoxFor(x => x.WorkerName, new { @class = "form-control form-control-sm" })
+        @Html.ValidationMessageFor(x => x.WorkerName, "", new { @class = "text-danger", style = "font-size:small" })
+    </div>
+</div>
+<div class="form-group row mb-1">
+    @Html.LabelFor(x => x.Phone, new { @class = "col-form-label col-form-label-sm col-2 text-end" })
+    <div class="col-4">
+        @Html.TextBoxFor(x => x.Phone, new { @class = "form-control form-control-sm" })
+        @Html.ValidationMessageFor(x => x.Phone, "", new { @class = "text-danger", style = "font-size:small" })
+    </div>
+</div>
+<div class="form-group row mb-1">
+    @Html.LabelFor(x => x.Address, new { @class = "col-form-label col-form-label-sm col-2 text-end" })
+    <div class="col-4">
+        @Html.TextBoxFor(x => x.Address, new { @class = "form-control form-control-sm" })
+        @Html.ValidationMessageFor(x => x.Address, "", new { @class = "text-danger", style = "font-size:small" })
+    </div>
+</div>
+<div class="form-group row mb-1">
+    @Html.LabelFor(x => x.PayRate, new { @class = "col-form-label col-form-label-sm col-2 text-end" })
+    <div class="col-4">
+        @Html.TextBoxFor(x => x.PayRate, new { @class = "form-control form-control-sm" })
+        @Html.ValidationMessageFor(x => x.PayRate, "", new { @class = "text-danger", style = "font-size:small" })
+    </div>
+</div>
+<div class="form-group row mb-1">
+    @Html.LabelFor(x => x.Picture, new { @class = "col-form-label col-form-label-sm col-2 text-end py-2" })
+    <div class="col-4 py-2">
+        @Html.TextBoxFor(x => x.Picture, new { @class = "form-control form-control-sm", type = "file" })
+        @Html.ValidationMessageFor(x => x.Picture, "", new { @class = "text-danger", style = "font-size:small" })
+    </div>
+    <div class="col-2 py-0">
+        <img src="~/Pictures/no-pic.jpg" class="img-thumbnail rounded-1" id="preview" style="width:40px" />
+    </div>
+</div>
+<div class="form-group row mb-1">
+    <div class="col-4 offset-2" id="skill-div">
+        <h4>Skills</h4>
+        @foreach (var s in (ViewData["Skills"] as List<HiredWorkerManagement.Models.Skill>))
+        {
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="SkillId" value="@s.SkillId" @(Model.SkillId.Any(x=> x == s.SkillId) ? "checked": "")>
+                <label class="form-check-label" for="exampleRadios3">
+                    @s.SkillName
+                </label>
+            </div>
+        }
+        <button type="button" class="btn btn-secondary btn-sm" id="add-more"><i class="bi bi-plus"></i> Add more skill</button>
+    </div>
+</div>
+<div class="row mb-1">
+    <div class="col-4 offset-2">
+        <h4>Work log</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Start date</th>
+                    <th>End date</th>
+                    <td> <button type="submit" class="btn btn-secondary btn-sm add" name="act" value="add" formnovalidate><i class="bi bi-plus"></i></button></td>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.WorkLogs.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @Html.TextBoxFor(x => Model.WorkLogs[i].StartDate, new { @class = "form-control form-control-sm" })
+                            @Html.ValidationMessageFor(x => Model.WorkLogs[i].StartDate, "", new { @class = "text-danger ", style = "font-size:small" })
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(x => Model.WorkLogs[i].EndDate, new { @class = "form-control form-control-sm" })
+                            @Html.ValidationMessageFor(x => Model.WorkLogs[i].EndDate, "", new { @class = "text-danger ", style = "font-size:small" })
+                        </td>
+                        <td>
+                            <button type="submit" class="btn btn-secondary btn-sm" name="act" value="remove_@i" formnovalidate><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row mb-1">
+    <div class="col-6 offset-2">
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary" name="act" value="update">Save to database</button>
+        </div>
+    </div>
+</div>
+

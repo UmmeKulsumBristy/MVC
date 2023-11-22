@@ -1,0 +1,146 @@
+﻿@model IEnumerable<HiredWorkerManagement.ViewModels.WorkerViewModel>
+@using X.PagedList
+@using X.PagedList.Mvc
+@using X.PagedList.Mvc.Common
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h3>Workers &amp; Work logs</h3>
+        <div class="d-flex justify-content-end mb-1" >
+            <a class="btn btn-outline-primary btn-sm" href="@Url.Action("Create", "Workers")"><i class="bi bi-plus"></i> Create New</a>            
+        </div>
+        <table class="table table-bordered">
+            <thead class="table-secondary">
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Worker Name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Skills</th>
+                    <th>Pay rate</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var w in Model)
+                {
+                    <tr>
+                         <td>
+                            <button type="button" class="btn btn-light showhide" data-pk="@w.WorkerId" >
+                                <i class="bi bi-plus show" id="show_@w.WorkerId" ></i>
+                                <i class="bi bi-dash hide" id="hide_@w.WorkerId" style="display:none"></i>
+                            </button>
+                         </td>
+                        <td><img src="~/Pictures/@w.Picture" class="rounded-circle" style="height:40px" /></td>
+                        <td>@w.WorkerName</td>
+                        <td>@w.Phone</td>
+                        <td>@w.Address</td>
+                        <td>@w.Skills</td>
+                        <td>@w.PayRate.ToString("0.00")</td>
+                        <td>
+                            <a class="btn btn-outline-primary btn-sm" href="@Url.Action("Edit", new {id=w.WorkerId})"><i class="bi bi-pencil"></i></a>
+                            <button type="button" class="btn btn-outline-danger btn-sm del" data-pk="@w.WorkerId"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr id="wl_@w.WorkerId" style="display:none">
+                        <td></td>
+                        <td colspan="7">
+                            <h4>Work logs</h4>
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-light">
+                                    <tr>
+                                        <td>Start date</td>
+                                        <td>End date</td>
+                                        <td>Days worked</td>
+                                        <td>Payable</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(var wl in w.WorkLogs)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(x => wl.StartDate)</td>
+                                            <td>@Html.DisplayFor(x => wl.EndDate)</td>
+                                            <td>@wl.DayWorked</td>
+                                            <td>@Html.DisplayFor(x => wl.Payable)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-end">
+            @Html.PagedListPager((IPagedList)Model, pg=> Url.Action("Index", new {pg=pg}),
+           new PagedListRenderOptions
+           {
+             
+               PageClasses= new string[] {"page-link"},
+               LiElementClasses= new string[] { "page-item" }
+           })
+        </div>
+    </div>
+</div>
+<div class="modal" tabindex="-1" id="delmodal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure to delete?</p>
+                <p class="text-danger">All related data will be remved.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" id="btndel">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section styles
+{
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+}
+@section scripts
+{
+    <script src="~/Scripts/jquery-3.7.0.js"></script>
+    <script>
+        var modal = new bootstrap.Modal(document.getElementById('delmodal'), {});
+        var delId = -1;
+        $(".showhide").click(function () {
+            var wid = $(this).data("pk");
+           // console.log(wid);
+            $("#wl_" + wid).toggle();
+            $("#show_" + wid).toggle();
+            $("#hide_" + wid).toggle();
+        });
+        $('.del').click(function () {
+            var id = $(this).data('pk');
+            delId = id;
+            modal.show();
+        });
+        $("#btndel").click(() => {
+            $.ajax({
+                type: "post",
+                url: "/Workers/Delete/" + delId,
+                dataType: "json",
+                success: r => {
+                    if (r.success == true) {
+                        $("#dv_" + r.id).remove();
+                        $("#sl_" + r.id).remove();
+                        modal.hide();
+                        delId = -1;
+                    }
+                }
+            });
+        });
+    </script>
+}

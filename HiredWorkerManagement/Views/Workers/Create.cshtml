@@ -1,0 +1,129 @@
+﻿@model HiredWorkerManagement.ViewModels.Input.WorkerInputModel
+@{
+    ViewBag.Title = "Create";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" id="alert" style="display:none">
+            <strong>Success!</strong> Data saved successfully.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div id="spinner" style="display:none">
+            <div class="d-flex align-items-center">
+                <strong>Loading...</strong>
+                <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+            </div>
+        </div>
+        @using (Ajax.BeginForm("Create", "Workers", new { }, new AjaxOptions { HttpMethod = "post", InsertionMode = InsertionMode.Replace, UpdateTargetId = "form-div", OnSuccess = "onSuccess", OnFailure = "onFailre", LoadingElementId = "spinner" }, new { id = "frm", enctype = "multipart/form-data" }))
+        {
+            <div id="form-div">
+                @Html.Partial("_CreatePartial", Model, new ViewDataDictionary(this.ViewData) { { "Act", "" } })
+            </div>
+        }
+
+    </div>
+</div>
+<div class="modal" tabindex="-1" id="skillmodal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Skill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               
+                <input type="text" id="sname" class="form-control form-control-sm" placeholder="skill name..." />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="add-skill">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section styles
+{
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="~/Content/bootstrap-datepicker.standalone.css" rel="stylesheet" />
+}
+@section scripts
+{
+    <script src="~/Scripts/jquery-3.7.0.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script>
+        var modal = new bootstrap.Modal(document.getElementById('skillmodal'), {})
+        $(() => {
+            //document.getElementById("Picture").addEventListener("change", evt => {
+            //    var file = evt.target.files[0];
+            //    document.getElementById("preview").src = URL.createObjectURL(file);
+            //});
+            addDatePicker();
+            $(document).on("change", "#Picture", function () {
+                console.log(this);
+                var file = this.files[0];
+                // console.log(file);
+                $("#preview").attr("src", URL.createObjectURL(file));
+            });
+            $(document).on('click', '#add-more', () => {
+                modal.show();
+            });
+            $("#add-skill").click(() => {
+                var name = $("#sname").val();
+                $.ajax({
+                    type: "get",
+                    url: "/Workers/AddSkill",
+                    data: { name: name },
+                    dataType: "json",
+                    success: r => {
+                        if (r.success == true) {
+                           $(` <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="SkillId"  value="${r.data.SkillId}'" >
+                                <label class="form-check-label" for="exampleRadios3">
+                                   ${r.data.SkillName}
+                                </label>
+                        </div>`).insertBefore("#add-more");
+                            $("#sname").val('');
+                        }
+                    }
+                })
+            });
+        });
+        function onSuccess() {
+            addDatePicker();
+            console.log($("#server-action").val());
+            if ($("#server-action").val() == "insert") {
+                $("#alert").show();
+                $("input[type=text]").val('');
+            }
+        }
+        function onFailure() {
+
+        }
+        function addDatePicker() {
+            $("input[id$=StartDate]").datepicker({
+                format: "yyyy-mm-dd"
+            });
+            $("input[id$=EndDate]").datepicker({
+                format: "yyyy-mm-dd"
+            });
+            $("input[id$=StartDate]").val(formatDate($("input[id$=StartDate]").val()));
+            if ($("input[id$=EndDate]").val() != "") {
+                console.log("nnn")
+                $("input[id$=EndDate]").val(formatDate($("input[id$=EndDate]").val()));
+            }
+        }
+        function formatDate(dt) {
+            console.log(dt);
+            var d = new Date(dt);
+            var date = [
+                d.getFullYear(),
+                ('0' + (d.getMonth() + 1)).slice(-2),
+                ('0' + d.getDate()).slice(-2)
+            ].join('-');
+            return date;
+        }
+    </script>
+}
+
